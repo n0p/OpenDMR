@@ -266,13 +266,7 @@ static void encode_ambe_frame(const int b[9], uint8_t *frame72)
     /* Pack b[9] into 49 bits */
     static const int b_lengths[9] = {7, 5, 5, 9, 7, 5, 4, 4, 3};
     uint8_t bits49[49];
-    int pos = 0;
-    for (int i = 0; i < 9; i++) {
-        int val = b[i];
-        for (int j = b_lengths[i] - 1; j >= 0; j--) {
-            bits49[pos++] = (val >> j) & 1;
-        }
-    }
+    encode_49bit(bits49,b);
 
     /* Extract 12-bit values for FEC encoding */
     /* C0 = bits49[0-11], C1 = bits49[12-23], C2 = bits49[24-34], C3 = bits49[35-48] */

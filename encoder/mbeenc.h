@@ -59,4 +59,6 @@ private:
 	float d_gain_adjust;
 };
 
+void encode_49bit(uint8_t outp[49], const int b[9]);
+
 #endif /* MBEENC_H */

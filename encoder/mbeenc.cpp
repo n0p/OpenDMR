@@ -199,14 +199,13 @@ static const unsigned int PRNG_TABLE[] = {
 #define WRITE_BIT(p, i, b) (p)[(i) >> 3] = ((b) ? ((p)[(i) >> 3] | (1 << (7 - ((i) & 7)))) : ((p)[(i) >> 3] & ~(1 << (7 - ((i) & 7)))))
 
 /* Forward declarations */
-static void encode_49bit(uint8_t outp[49], const int b[9]);
 static void encode_ambe(const IMBE_PARAM *imbe_param, int b[], mbe_parms *cur_mp, mbe_parms *prev_mp, float gain_adjust);
 
 /*
  * Encode voice parameters to 49-bit DMR format.
  * Called after encode_ambe to update decoder state.
  */
-static void encode_49bit(uint8_t outp[49], const int b[9])
+void encode_49bit(uint8_t outp[49], const int b[9])
 {
 	outp[0] = (b[0] >> 6) & 1;
 	outp[1] = (b[0] >> 5) & 1;
