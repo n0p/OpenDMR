@@ -29,7 +29,13 @@
  * @brief Thread-local storage specifier.
  *
  * Portable macro for thread-local variables across compilers.
+ *
+ * Bare-metal firmware builds with a single vocoder instance define it to
+ * nothing (-DMBE_THREAD_LOCAL=) to get plain statics: __thread on ARM is
+ * resolved through emutls, which needs malloc at run time and cannot be
+ * placed in .bss by the linker.
  */
+#ifndef MBE_THREAD_LOCAL
 #if defined(_MSC_VER)
 #define MBE_THREAD_LOCAL __declspec(thread)
 #elif defined(__GNUC__) || defined(__clang__)
@@ -39,6 +45,7 @@
 #else
 /* Fallback for non-C11 compilers: most support __thread as an extension */
 #define MBE_THREAD_LOCAL __thread
+#endif
 #endif
 
 /**

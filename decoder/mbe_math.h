@@ -25,6 +25,12 @@
  */
 static inline void
 mbe_sincosf(float x, float* s, float* c) {
+#ifdef MBE_SINCOSF
+    /* Caller-provided implementation: firmware builds use it to keep the
+     * float pipeline bit-identical across toolchains and libm versions. */
+    MBE_SINCOSF(x, s, c);
+    return;
+#endif
 #if defined(__has_builtin)
 #if __has_builtin(__builtin_sincosf)
     __builtin_sincosf(x, s, c);

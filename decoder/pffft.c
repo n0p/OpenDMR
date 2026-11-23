@@ -344,9 +344,21 @@ validate_pffft_simd() {} // allow test_pffft.c to call this function even when s
 /* SSE and co like 16-bytes aligned pointers */
 #define MALLOC_V4SF_ALIGNMENT 64 // with a 64-byte alignment, we are even aligned on L2 cache lines...
 
+/*
+  Allocator hooks: bare-metal builds replace these with a static arena, so that
+  the setup of the transform never touches the C library heap.  Define
+  PFFFT_MALLOC/PFFFT_FREE on the compiler command line to override.
+*/
+#ifndef PFFFT_MALLOC
+#define PFFFT_MALLOC(nb_bytes) malloc(nb_bytes)
+#endif
+#ifndef PFFFT_FREE
+#define PFFFT_FREE(ptr) free(ptr)
+#endif
+
 void*
 pffft_aligned_malloc(size_t nb_bytes) {
-    void *p, *p0 = malloc(nb_bytes + MALLOC_V4SF_ALIGNMENT);
+    void *p, *p0 = PFFFT_MALLOC(nb_bytes + MALLOC_V4SF_ALIGNMENT);
     if (!p0) {
         return (void*)0;
     }
@@ -358,7 +370,7 @@ pffft_aligned_malloc(size_t nb_bytes) {
 void
 pffft_aligned_free(void* p) {
     if (p) {
-        free(*((void**)p - 1));
+        PFFFT_FREE(*((void**)p - 1));
     }
 }
 
@@ -1368,7 +1380,7 @@ pffft_new_setup(int N, pffft_transform_t transform) {
         assert(0);
         return 0;
     }
-    PFFFT_Setup* s = (PFFFT_Setup*)malloc(sizeof(PFFFT_Setup));
+    PFFFT_Setup* s = (PFFFT_Setup*)PFFFT_MALLOC(sizeof(PFFFT_Setup));
     int k, m;
     /* unfortunately, the fft size must be a multiple of 16 for complex FFTs
      and 32 for real FFTs -- a lot of stuff would need to be rewritten to
@@ -1419,7 +1431,7 @@ pffft_new_setup(int N, pffft_transform_t transform) {
 void
 pffft_destroy_setup(PFFFT_Setup* s) {
     pffft_aligned_free(s->data);
-    free(s);
+    PFFFT_FREE(s);
 }
 
 #if !defined(PFFFT_SIMD_DISABLE)
